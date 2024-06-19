@@ -9,6 +9,8 @@ list_of_images_to_send = []
 
 
 async def main_page(page, temp_folder, session=None):
+    # Progress ring
+    pr = ft.ProgressRing(width=16, height=16, stroke_width=2, visible=False)
 
     # Функции, выполняемые на главной странице
     async def send_text_to_server(json_text_to_send):
@@ -26,6 +28,8 @@ async def main_page(page, temp_folder, session=None):
 
     async def upload_files():
         if file_picker.result is not None and file_picker.result.files is not None:
+            pr.visible = True
+            page.update()
             global list_of_images_to_send
             local_list_of_control_photo_to_send = []
             for file in list_of_images_to_send:
@@ -51,7 +55,8 @@ async def main_page(page, temp_folder, session=None):
                     expand=True,
                     expand_loose=True
                 ))
-            page.update()
+                pr.visible = False
+                page.update()
             list_of_images_to_send = []
             file_picker.result.files = []
 
@@ -202,5 +207,11 @@ async def main_page(page, temp_folder, session=None):
                                         height=writing_message_height,
                                         padding=ft.padding.only(left=10, right=10))
 
+    progress_ring_zone = ft.Container(pr, alignment=ft.alignment.center)
+
     page.add(ft.SafeArea(content=chat_zone, expand=True, expand_loose=True))
-    page.add(ft.SafeArea(content=ft.Column([upload_photo_container, divider, writing_message_zone], spacing=0)))
+    page.add(ft.SafeArea(content=ft.Column([progress_ring_zone,
+                                            upload_photo_container,
+                                            divider,
+                                            writing_message_zone],
+                                           spacing=0)))
