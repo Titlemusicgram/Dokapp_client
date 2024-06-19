@@ -21,7 +21,7 @@ async def main_page(page, temp_folder, session=None):
     async def send_photo_to_server(file):
         with open(file, 'rb') as f:
             async with session.post('/post_photo', data={"file": f}) as resp:
-                print(await resp.status)
+                print(resp.status)
                 print(await resp.text())
 
     async def upload_files():
