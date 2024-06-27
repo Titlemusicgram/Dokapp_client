@@ -2,6 +2,7 @@ import aiohttp
 
 # Web settings
 root_address = "https://dokapp-server.vercel.app/"
+# root_address = "http://127.0.0.1:8000"
 
 
 # Выбор работы по сети или локально
