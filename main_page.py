@@ -1,4 +1,5 @@
 import shutil
+from web_connection import root_address
 
 import flet as ft
 from style import (chat_text_clr, hint_text_clr, chat_bg_clr, fields_bg_color, chat_text_size,
@@ -10,23 +11,25 @@ list_of_selected_control_images = []
 list_of_images_to_send = []
 
 
-async def main_page(page, temp_folder, session=None):
+async def main_page(page, temp_folder, session):
     # Progress ring
     pr = ft.ProgressRing(width=16, height=16, stroke_width=2, visible=False)
 
     # Функции, выполняемые на главной странице
-    async def send_text_to_server(json_text_to_send):
+    def send_text_to_server(json_text_to_send):
         # Пока что GET-запрос для проверки
-        async with session.post('/', json=json_text_to_send) as resp:
-            print(resp.status)
-            json_content = await resp.json()
+        with session.post(root_address, json=json_text_to_send) as resp:
+            print(resp.status_code)
+            json_content = resp.json()
             print(json_content)
 
-    async def send_photo_to_server(file):
+    def send_photo_to_server(file):
+        url = f"{root_address}post_photo"
         with open(file, 'rb') as f:
-            async with session.post('/post_photo', data={"file": f}) as resp:
-                print(resp.status)
-                print(await resp.text())
+            files = {"file": f}
+            with session.post(url, files=files) as resp:
+                print(resp.status_code)
+                print(resp.text)
 
     async def upload_files():
         if file_picker.result is not None and file_picker.result.files is not None:
@@ -39,7 +42,7 @@ async def main_page(page, temp_folder, session=None):
                 # Здесь отправляем фото на сервер, если подключение существует
                 if session is not None:
                     # Вызываем функцию отправки фотографии на сервер
-                    await send_photo_to_server(file)
+                    send_photo_to_server(file)
 
                 local_list_of_control_photo_to_send.append(ft.Image(src=file, width=112,
                                                                     border_radius=10, fit=ft.ImageFit.SCALE_DOWN))
@@ -73,7 +76,7 @@ async def main_page(page, temp_folder, session=None):
             if session is not None:
                 json_text_to_send = {"text": f"{write_message_field.value}"}
                 # Вызываем функцию отправки текста на сервер
-                await send_text_to_server(json_text_to_send)
+                send_text_to_server(json_text_to_send)
 
             text_row = ft.Container(
                 content=text,

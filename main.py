@@ -18,7 +18,7 @@ async def main(page: ft.Page):
     set_view(page)
 
     # Вызываем функцию для создания соединения с сервером
-    session = await set_the_connection()
+    session = set_the_connection()
 
     # Запускаем код главной страницы приложения
     await main_page(page, temp_folder, session)
