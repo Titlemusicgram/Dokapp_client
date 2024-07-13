@@ -1,3 +1,5 @@
+import shutil
+
 import flet as ft
 from style import (chat_text_clr, hint_text_clr, chat_bg_clr, fields_bg_color, chat_text_size,
                    writing_message_height, shdw)
@@ -102,6 +104,16 @@ async def main_page(page, temp_folder, session=None):
 
     dismiss_icon = MyButton(icon=ft.icons.CLOSE, on_click=dismiss_selected_photos)
 
+    def resize_image(cur_file, small_photo_path):
+        with Image.open(cur_file.path) as im:
+            if 'exif' in im.info.keys():
+                exif = im.info['exif']
+                im = im.resize((1600, 1200))
+                im.save(small_photo_path, exif=exif)
+            else:
+                im = im.resize((1600, 1200))
+                im.save(small_photo_path)
+
     async def pick_files_result(e: ft.FilePickerResultEvent):
         global list_of_selected_control_images
         global list_of_images_to_send
@@ -110,14 +122,8 @@ async def main_page(page, temp_folder, session=None):
         if e is not None and e.files is not None:
             for f in e.files:
                 small_photo_path = f'{temp_folder}/{f.name}'
-                with Image.open(f.path) as im:
-                    if 'exif' in im.info.keys():
-                        exif = im.info['exif']
-                        im = im.resize((1600, 1200))
-                        im.save(small_photo_path, exif=exif)
-                    else:
-                        im = im.resize((1600, 1200))
-                        im.save(small_photo_path)
+                # resize_image(f, small_photo_path)  # Раскомментировать, когда обновится flet
+                shutil.copyfile(f.path, small_photo_path)  # Удалить, когда обновится flet
                 list_of_images_to_send.append(small_photo_path)
                 photo = ft.Image(src=small_photo_path, fit=ft.ImageFit.SCALE_DOWN, border_radius=10)
                 list_of_selected_control_images.append(photo)
